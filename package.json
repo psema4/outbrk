@@ -2,12 +2,9 @@
   "name": "outbrk",
   "version": "1.0.0",
   "description": "A tiny game engine",
-  "main": "dist/outbrk.js",
+  "main": "src/outbrk.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node ./node_modules/browserify/index.js -d -o dist/outbrk.engine.js src/outbrk.js",
-    "dist": "node ./node_modules/browserify/index.js -o dist/outbrk.engine.js src/outbrk.js && node ./node_modules/uglifyjs/bin/uglifyjs dist/outbrk.engine.js > dist/outbrk.engine.min.js",
-    "server": "npm run-script dev && cd ./dist && node ../node_modules/http-server/bin/http-server"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

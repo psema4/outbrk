@@ -1,5 +1,7 @@
-window.addEventListener('load', function() {
-    var objectPool = require('./objectPool')
+var outbrk = function(opts) {
+    opts = opts || {};
+
+    var objectPool = opts.objectPool || require('./objectPool')
       , renderSystem = require('./systems/renderSystem')
       , moverSystem = require('./systems/moverSystem')
       , $ = function(sel) { return document.querySelector(sel); }
@@ -29,4 +31,6 @@ window.addEventListener('load', function() {
     } else {
         console.warn('outbrk: unable to initialize');
     }
-});
+};
+
+module.exports = outbrk;

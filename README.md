@@ -4,9 +4,5 @@ A tiny game engine for js13k based on @jamesseanwright's [breakout](https://gith
 
 ## usage summary
 
-1. clone this repo
-1. cd outbrk
-1. npm install
-1. edit files as necessary
-1. npm run-script server
+You'll want to require() this library via a git submodule until it's ready for publishing to npmjs.org. See [silver-carnival](https://github.com/psema4/silver-carnival) for an example.
 
