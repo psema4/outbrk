@@ -10,8 +10,8 @@ Moveable.prototype.invoke = function() {
 
     if (!entity.isActive) return;
 
-    this.entity.x += entity.xSpeed;
-    this.entity.y += entity.ySpeed;
+    entity.x += entity.xSpeed;
+    entity.y += entity.ySpeed;
 }
 
 module.exports = Moveable;

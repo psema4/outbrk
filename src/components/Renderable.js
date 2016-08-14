@@ -44,6 +44,12 @@ Renderable._types = {
 
         opts.context.fill();
     }
+
+  , surface: function() {
+        /*  drawing handled in fillStyle, anything added here will be drawn overtop
+            which may be useful for huds, life bars, tags, badges etc
+        */
+    }
 };
 
 Renderable._fillStyles = {
@@ -74,6 +80,11 @@ Renderable._fillStyles = {
         var pattern = opts.context.createPattern(opts.fillStyle.source, 'repeat');
 
         opts.context.fillStyle = pattern;
+    }
+
+  , drawable: function(opts) {
+        opts = opts || {};
+        opts.fillStyle.draw(opts);
     }
 };
 
