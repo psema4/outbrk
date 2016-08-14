@@ -24,8 +24,15 @@ Renderable._types = {
         var projectedX = opts.entity.x * opts.viewport.width
           , projectedY = opts.entity.y * opts.viewport.height
           , projectedRadius = opts.entity.radius * opts.viewport.width
+          , _fillStyle = opts.context.fillStyle
         ;
 
+/* draw background for collision testing
+        opts.context.fillStyle = 'red';
+        opts.context.fillRect(projectedX - projectedRadius, projectedY - projectedRadius, projectedRadius*2, projectedRadius*2);
+*/
+
+        opts.context.fillStyle = _fillStyle;
         opts.context.beginPath();
         opts.context.arc(projectedX, projectedY, projectedRadius, 0, Math.PI * 2);
         opts.context.fill();
