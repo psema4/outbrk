@@ -1,14 +1,13 @@
 module.exports = {
-    init: function() {
+    init: function(opts) {
+        opts = opts || {};
         this.components = [];
-
-        console.log('collisionSystem initialized');
+        this.msgbus = opts.msgbus;
     }
 
   , register: function(component) {
         this.components.push(component);
-
-        console.log('collisionSystem: registered component:', component);
+        this.msgbus.publish('componentRegistered', { system: 'collisionSystem', component: component });
     }
 
   , setPlayer: function(entity) {

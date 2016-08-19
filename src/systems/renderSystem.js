@@ -8,15 +8,14 @@ module.exports = {
         this.components = [];
         this.context = opts.context;
         this.viewport = opts.viewport; 
+        this.msgbus = opts.msgbus;
 
-        console.log('renderSystem initialized, using context & viewport:', this.context, this.viewport);
         return true;
     },
 
     register: function(component) {
         this.components.push(component);
-
-        console.log('renderSystem: registered component:', component);
+        this.msgbus.publish('componentRegistered', { system: 'renderSystem', component: component });
     },
 
     invoke: function() {

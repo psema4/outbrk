@@ -7,22 +7,25 @@ var Renderable = require('../components/Renderable')
   , RADIUS = 0.01
 ;
 
-function Ball() {
-    this.name = 'Ball';
-    this.isActive = true;
+function Ball(opts) {
+    opts = opts || {};
 
-    this.x = x;
-    this.y = y;
-    this.radius = RADIUS;
+    this.name = opts.name || 'Ball';
+    this.isActive = true;
+    this.msgbus = opts.msgbus;
+
+    this.x = opts.x || x;
+    this.y = opts.y || y;
+    this.radius = opts.radius || RADIUS;
 
     //FIXME: make collision bounds more clear
-    this.width = 0.02;
-    this.height = 0.02;
+    this.width = opts.width || 0.02;
+    this.height = opts.height || 0.02;
 
-    this.xSpeed = SPEED;
-    this.ySpeed = SPEED;
+    this.xSpeed = opts.xSpeed || SPEED;
+    this.ySpeed = opts.ySpeed || SPEED;
 
-    this.renderOpts = {
+    this.renderOpts = opts.renderOpts || {
         type: 'circle'
 
       , fillStyle: {
@@ -31,7 +34,7 @@ function Ball() {
         }
     };
 
-    this.collisionOpts = {
+    this.collisionOpts = opts.collisionOpts || {
         type: 'box'
       , action: 'deflect'
       , speedProp: 'ySpeed'

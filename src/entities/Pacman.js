@@ -8,18 +8,21 @@ var Renderable = require('../components/Renderable')
   , HEIGHT = 0.05
 ;
 
-function Pacman() {
-    this.name = 'Pacman';
+function Pacman(opts) {
+    opts = opts || {};
+
+    this.name = opts.name || 'Pacman';
     this.isActive = true;
+    this.msgbus = opts.msgbus;
 
-    this.x = x;
-    this.y = y;
-    this.width = WIDTH;
-    this.height = HEIGHT;
-    this.xSpeed = SPEED;
-    this.ySpeed = SPEED;
+    this.x = opts.x || x;
+    this.y = opts.y || y;
+    this.width = opts.width || WIDTH;
+    this.height = opts.height || HEIGHT;
+    this.xSpeed = opts.xSpeed || SPEED;
+    this.ySpeed = opts.ySpeed || SPEED;
 
-    this.renderOpts = {
+    this.renderOpts = opts.renderOpts || {
         type: 'surface'
 
       , fillStyle: {
@@ -45,7 +48,7 @@ function Pacman() {
         }
     }
 
-    this.collisionOpts = {
+    this.collisionOpts = opts.collisionOpts || {
         type: 'box'
       , action: 'deflect'
       , speedProp: 'ySpeed'

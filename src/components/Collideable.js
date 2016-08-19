@@ -110,6 +110,7 @@ Collideable.prototype.invoke = function(other) {
 
 	if (hasIntersect) {
         Collideable._actions[action]({ other: other, entity: entity, speedProp: speedProp });
+        entity.msgbus.publish('collision', { entity: entity, other: other });
     }
 };
 

@@ -1,14 +1,13 @@
 module.exports = {
-    init: function() {
+    init: function(opts) {
+        opts = opts || {};
         this.components = [];
-
-        console.log('moverSystem initialized');
+        this.msgbus = opts.msgbus;
     },
 
     register: function(component) {
         this.components.push(component);
-
-        console.log('moverSystem: registered component:', component);
+        this.msgbus.publish('componentRegistered', { system: 'moverSystem', component: component });
     },
 
     invoke: function() {
