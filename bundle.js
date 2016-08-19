@@ -1,4 +1,38 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+function MessageBus() {
+    var handlers = {};
+
+    function subscribe(eventName, cb) {
+        if (! handlers.hasOwnProperty(eventName)) {
+            handlers[eventName] = [];
+        }
+
+        handlers[eventName].push(cb);
+    }
+
+    function unsubscribe(eventName, cb) {
+        //FIXME: stub
+    }
+
+    function publish(eventName, opts) {
+        var callbacks = handlers[eventName];
+        if (callbacks) {
+            [].forEach.call(callbacks, function(callback) {
+                callback(opts);
+            });
+        }
+    }
+
+    return {
+        subscribe: subscribe
+//      , unsubscribe: unsubscribe
+      , publish: publish
+    }
+}
+
+module.exports = MessageBus;
+
+},{}],2:[function(require,module,exports){
 var collisionSystem = require('../systems/collisionSystem');
 
 function Collideable(entity) {
@@ -111,12 +145,13 @@ Collideable.prototype.invoke = function(other) {
 
 	if (hasIntersect) {
         Collideable._actions[action]({ other: other, entity: entity, speedProp: speedProp });
+        entity.msgbus.publish('collision', { entity: entity, other: other });
     }
 };
 
 module.exports = Collideable;
 
-},{"../systems/collisionSystem":9}],2:[function(require,module,exports){
+},{"../systems/collisionSystem":10}],3:[function(require,module,exports){
 var moverSystem = require('../systems/moverSystem');
 
 function Moveable(entity) {
@@ -135,7 +170,7 @@ Moveable.prototype.invoke = function() {
 
 module.exports = Moveable;
 
-},{"../systems/moverSystem":10}],3:[function(require,module,exports){
+},{"../systems/moverSystem":11}],4:[function(require,module,exports){
 var renderSystem = require('../systems/renderSystem');
 
 function Renderable(entity) {
@@ -263,7 +298,7 @@ Renderable.prototype.invoke = function(context, viewport) {
 
 module.exports = Renderable;
 
-},{"../systems/renderSystem":11}],4:[function(require,module,exports){
+},{"../systems/renderSystem":12}],5:[function(require,module,exports){
 var Renderable = require('../components/Renderable')
   , Moveable = require('../components/Moveable')
   , Collideable = require('../components/Collideable')
@@ -273,22 +308,25 @@ var Renderable = require('../components/Renderable')
   , RADIUS = 0.01
 ;
 
-function Ball() {
-    this.name = 'Ball';
-    this.isActive = true;
+function Ball(opts) {
+    opts = opts || {};
 
-    this.x = x;
-    this.y = y;
-    this.radius = RADIUS;
+    this.name = opts.name || 'Ball';
+    this.isActive = true;
+    this.msgbus = opts.msgbus;
+
+    this.x = opts.x || x;
+    this.y = opts.y || y;
+    this.radius = opts.radius || RADIUS;
 
     //FIXME: make collision bounds more clear
-    this.width = 0.02;
-    this.height = 0.02;
+    this.width = opts.width || 0.02;
+    this.height = opts.height || 0.02;
 
-    this.xSpeed = SPEED;
-    this.ySpeed = SPEED;
+    this.xSpeed = opts.xSpeed || SPEED;
+    this.ySpeed = opts.ySpeed || SPEED;
 
-    this.renderOpts = {
+    this.renderOpts = opts.renderOpts || {
         type: 'circle'
 
       , fillStyle: {
@@ -297,7 +335,7 @@ function Ball() {
         }
     };
 
-    this.collisionOpts = {
+    this.collisionOpts = opts.collisionOpts || {
         type: 'box'
       , action: 'deflect'
       , speedProp: 'ySpeed'
@@ -310,7 +348,7 @@ function Ball() {
 
 module.exports = Ball;
 
-},{"../components/Collideable":1,"../components/Moveable":2,"../components/Renderable":3}],5:[function(require,module,exports){
+},{"../components/Collideable":2,"../components/Moveable":3,"../components/Renderable":4}],6:[function(require,module,exports){
 var Renderable = require('../components/Renderable')
   , Moveable = require('../components/Moveable')
   , Collideable = require('../components/Collideable')
@@ -321,18 +359,21 @@ var Renderable = require('../components/Renderable')
   , HEIGHT = 0.05
 ;
 
-function Pacman() {
-    this.name = 'Pacman';
+function Pacman(opts) {
+    opts = opts || {};
+
+    this.name = opts.name || 'Pacman';
     this.isActive = true;
+    this.msgbus = opts.msgbus;
 
-    this.x = x;
-    this.y = y;
-    this.width = WIDTH;
-    this.height = HEIGHT;
-    this.xSpeed = SPEED;
-    this.ySpeed = SPEED;
+    this.x = opts.x || x;
+    this.y = opts.y || y;
+    this.width = opts.width || WIDTH;
+    this.height = opts.height || HEIGHT;
+    this.xSpeed = opts.xSpeed || SPEED;
+    this.ySpeed = opts.ySpeed || SPEED;
 
-    this.renderOpts = {
+    this.renderOpts = opts.renderOpts || {
         type: 'surface'
 
       , fillStyle: {
@@ -358,7 +399,7 @@ function Pacman() {
         }
     }
 
-    this.collisionOpts = {
+    this.collisionOpts = opts.collisionOpts || {
         type: 'box'
       , action: 'deflect'
       , speedProp: 'ySpeed'
@@ -371,34 +412,35 @@ function Pacman() {
 
 module.exports = Pacman;
 
-},{"../components/Collideable":1,"../components/Moveable":2,"../components/Renderable":3}],6:[function(require,module,exports){
-/* The Player object should not use the current implementation of the Collideable 
- * component. *All collisions* are currently processed against the player
- */
+},{"../components/Collideable":2,"../components/Moveable":3,"../components/Renderable":4}],7:[function(require,module,exports){
 var Renderable = require('../components/Renderable')
   , Moveable = require('../components/Moveable')
+  , Collideable = require('../components/Collideable')
   , x = 1.10    // percentages
   , y = 1.00
   , SPEED = -0.004
   , RADIUS = 0.02
 ;
 
-function Player() {
-    this.name = 'Player';
-    this.isActive = true;
+function Player(opts) {
+    opts = opts || {};
 
-    this.x = x;
-    this.y = y;
-    this.radius = RADIUS;
+    this.name = opts.name || 'Player';
+    this.isActive = true;
+    this.msgbus = opts.msgbus;
+
+    this.x = opts.x || x;
+    this.y = opts.y || y;
+    this.radius = opts.radius || RADIUS;
 
     //FIXME: make collision bounds more clear
-    this.width = 0.04;
-    this.height = 0.04;
+    this.width = opts.width || 0.04;
+    this.height = opts.height || 0.04;
 
-    this.xSpeed = SPEED;
-    this.ySpeed = SPEED;
+    this.xSpeed = opts.xSpeed || SPEED;
+    this.ySpeed = opts.ySpeed || SPEED;
 
-    this.renderOpts = {
+    this.renderOpts = opts.renderOpts || {
         type: 'circle'
 
       , fillStyle: {
@@ -407,92 +449,143 @@ function Player() {
         }
     };
 
+    this.collisionOpts = opts.collisionOpts || {
+        type: 'box'
+      , action: 'deflect'
+      , speedProp: 'ySpeed'
+    }
+
+
     new Renderable(this);
     new Moveable(this);
+    new Collideable(this);
 }
 
 module.exports = Player;
 
-},{"../components/Moveable":2,"../components/Renderable":3}],7:[function(require,module,exports){
+},{"../components/Collideable":2,"../components/Moveable":3,"../components/Renderable":4}],8:[function(require,module,exports){
 var Ball = require('./entities/Ball')
   , Player = require('./entities/Player')
   , Pacman = require('./entities/Pacman')
   , pool = {}
 ;
 
-module.exports = {
-    get: function(key) {
-        return pool[key];
-    }
+function ObjectPool(opts) {
+    opts = opts || {};
 
-  , getAll: function() {
-      return pool;
-    }
+    this.msgbus = opts.msgbus;
+}
 
-  , create: function() {
-        pool.ball = new Ball();
-        pool.player = new Player();
-        pool.pacman = new Pacman();
+ObjectPool.prototype.get = function(key) {
+    return pool[key];
+};
+
+ObjectPool.prototype.set = function(key, obj) {
+    pool[key] = obj;
+}
+
+ObjectPool.prototype.getPool = function() {
+    return pool;
+};
+
+ObjectPool.prototype.create = function(fn) {
+    if (fn && typeof fn === 'function') {
+        fn(pool);
     }
 }
 
-},{"./entities/Ball":4,"./entities/Pacman":5,"./entities/Player":6}],8:[function(require,module,exports){
+module.exports = ObjectPool;
+
+},{"./entities/Ball":5,"./entities/Pacman":6,"./entities/Player":7}],9:[function(require,module,exports){
 var outbrk = function(opts) {
-    opts = opts || {};
+        opts = opts || {};
 
-    var objectPool = opts.objectPool || require('./objectPool')
-      , renderSystem = require('./systems/renderSystem')
-      , moverSystem = require('./systems/moverSystem')
-      , collisionSystem = require('./systems/collisionSystem')
-      , $ = function(sel) { return document.querySelector(sel); }
-      , $$ = function(sel) { return document.querySelectorAll(sel); }
-      , $canvas = $('canvas')
-      , ctx2d = $canvas.getContext('2d')
-      , viewport = { width: $canvas.width, height: $canvas.height }
-    ;
+            // core
+        var ObjectPool = require('./objectPool')
+          , MessageBus = require('./MessageBus')
 
-    if (renderSystem.init({ context: ctx2d, viewport: viewport })) {
-        moverSystem.init();
-        collisionSystem.init();
+            // systems
+          , renderSystem = require('./systems/renderSystem')
+          , moverSystem = require('./systems/moverSystem')
+          , collisionSystem = require('./systems/collisionSystem')
 
-        objectPool.create();
-        window.objectPool = objectPool;
+            // entities/prefabs
+          , Ball = require('./entities/Ball')
+          , Player = require('./entities/Player')
+          , Pacman = require('./entities/Pacman')
 
-        collisionSystem.setPlayer(objectPool.get('player'));
+            // configurables
+          , msgbus = opts.msgbus || new MessageBus()
+          , objectPool = opts.objectPool || new ObjectPool()
 
-        function gameloop() {
-            var pool = objectPool.getAll();
+          , createPool = opts.createPool || function(pool) {
+                pool.ball = new Ball({ x: 0.15, msgbus: msgbus });
+                pool.player = new Player({ msgbus: msgbus });
+                pool.pacman = new Pacman({ msgbus: msgbus });
+            }
 
-            ctx2d.clearRect(0, 0, viewport.width, viewport.height);
-            moverSystem.invoke();
+            // rendering setup
+          , $ = function(sel) { return document.querySelector(sel); }
+          , $$ = function(sel) { return document.querySelectorAll(sel); }
+          , $canvas = $('canvas')
+          , ctx2d = $canvas.getContext('2d')
+          , viewport = { width: $canvas.width, height: $canvas.height }
+        ;
 
-            collisionSystem.invoke(pool);
-            renderSystem.invoke();
+        // setup engine interface
+        this.msgbus = msgbus;
+        this.viewport = viewport;
+        this.objectPool = objectPool;
+        this.prefabs = {
+            Ball: Ball
+          , Player: Player
+          , Pacman: Pacman
+        };
 
-            requestAnimationFrame(gameloop);
+        // init and run
+        if (renderSystem.init({ msgbus: msgbus, context: ctx2d, viewport: viewport })) {
+            moverSystem.init({ msgbus: msgbus });
+            collisionSystem.init({ msgbus: msgbus });
+
+            objectPool.create(createPool);
+
+            collisionSystem.setPlayer(objectPool.get('player'));
+
+            msgbus.publish('gameStart');
+
+            function gameloop() {
+                var pool = objectPool.getPool();
+
+                ctx2d.clearRect(0, 0, viewport.width, viewport.height);
+                moverSystem.invoke();
+
+                collisionSystem.invoke(pool);
+                renderSystem.invoke();
+
+                requestAnimationFrame(gameloop);
+            }
+
+            gameloop();
+
+        } else {
+            console.warn('outbrk: unable to initialize');
         }
-
-        gameloop();
-
-    } else {
-        console.warn('outbrk: unable to initialize');
     }
-};
+;
 
 module.exports = outbrk;
 
-},{"./objectPool":7,"./systems/collisionSystem":9,"./systems/moverSystem":10,"./systems/renderSystem":11}],9:[function(require,module,exports){
+},{"./MessageBus":1,"./entities/Ball":5,"./entities/Pacman":6,"./entities/Player":7,"./objectPool":8,"./systems/collisionSystem":10,"./systems/moverSystem":11,"./systems/renderSystem":12}],10:[function(require,module,exports){
 module.exports = {
-    init: function() {
+    init: function(opts) {
+        opts = opts || {};
         this.components = [];
-
-        console.log('collisionSystem initialized');
+        this.msgbus = opts.msgbus;
     }
 
   , register: function(component) {
         this.components.push(component);
-
-        console.log('collisionSystem: registered component:', component);
+        this.msgbus.publish('componentRegistered', { system: 'collisionSystem', component: component });
     }
 
   , setPlayer: function(entity) {
@@ -512,18 +605,17 @@ module.exports = {
     }
 }
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = {
-    init: function() {
+    init: function(opts) {
+        opts = opts || {};
         this.components = [];
-
-        console.log('moverSystem initialized');
+        this.msgbus = opts.msgbus;
     },
 
     register: function(component) {
         this.components.push(component);
-
-        console.log('moverSystem: registered component:', component);
+        this.msgbus.publish('componentRegistered', { system: 'moverSystem', component: component });
     },
 
     invoke: function() {
@@ -533,7 +625,7 @@ module.exports = {
     }
 }
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = {
     init: function(opts) {
         if (!opts || !opts.context || !opts.viewport ) {
@@ -544,15 +636,14 @@ module.exports = {
         this.components = [];
         this.context = opts.context;
         this.viewport = opts.viewport; 
+        this.msgbus = opts.msgbus;
 
-        console.log('renderSystem initialized, using context & viewport:', this.context, this.viewport);
         return true;
     },
 
     register: function(component) {
         this.components.push(component);
-
-        console.log('renderSystem: registered component:', component);
+        this.msgbus.publish('componentRegistered', { system: 'renderSystem', component: component });
     },
 
     invoke: function() {
@@ -566,14 +657,37 @@ module.exports = {
     }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var outbrk = require('../src/outbrk')
-  , objectPool = require('../src/objectPool')
+  , MessageBus = require('../src/MessageBus')
+  , ObjectPool = require('../src/objectPool')
 ;
 
 window.addEventListener('load', function() {
     console.log('load');
-    window.game = new outbrk({ objectPool: objectPool });
+
+/*
+    var msgbus = new MessageBus()
+      , objectPool = new ObjectPool({ msgbus: msgbus })
+    ;
+
+    msgbus.subscribe('componentRegistered', function(opts) {
+        console.log('%s registered component:', opts.systemName, opts.component);
+    });
+
+    msgbus.subscribe('collision', function(opts) {
+        console.log('collision between entity, other:', opts.entity, opts.other);
+    });
+
+    msgbus.subscribe('gameStart', function() {
+        console.log('game starting!');
+    });
+
+
+    window.game = new outbrk({ objectPool: objectPool, msgbus: msgbus });
+*/
+
+    window.game = new outbrk();
 });
 
-},{"../src/objectPool":7,"../src/outbrk":8}]},{},[12]);
+},{"../src/MessageBus":1,"../src/objectPool":8,"../src/outbrk":9}]},{},[13]);
