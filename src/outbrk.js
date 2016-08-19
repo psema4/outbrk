@@ -33,6 +33,16 @@ var outbrk = function(opts) {
           , viewport = { width: $canvas.width, height: $canvas.height }
         ;
 
+        // setup engine interface
+        this.msgbus = msgbus;
+        this.viewport = viewport;
+        this.objectPool = objectPool;
+        this.prefabs = {
+            Ball: Ball
+          , Player: Player
+          , Pacman: Pacman
+        };
+
         // init and run
         if (renderSystem.init({ msgbus: msgbus, context: ctx2d, viewport: viewport })) {
             moverSystem.init({ msgbus: msgbus });
