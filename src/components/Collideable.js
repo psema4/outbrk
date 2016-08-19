@@ -14,7 +14,7 @@ Collideable._actions = {
           , speedProp = opts.speedProp
         ;
 
-		other[speedProp] *= -1;
+        other[speedProp] *= -1;
 	},
 
 	deactivate(opts) {
@@ -41,48 +41,76 @@ Collideable._getClosestPoint = function getPoint(opts) {
 	return Math.max(minimum, Math.min(maximum, point));
 };
 
+Collideable._getBoundingBox = function(entity) {
+    function xProjection(x) {
+        return x * 640; // FIXME: viewport width
+    }
+
+    function yProjection(y) {
+        return y * 480; // FIXME: viewport height
+    }
+
+    var boundingBox = {
+            x: xProjection(entity.x) - xProjection(entity.width)/2
+          , y: yProjection(entity.y) - yProjection(entity.height)/2
+          , w: xProjection(entity.width)
+          , h: yProjection(entity.height)
+        }
+    ;
+
+    return boundingBox;
+};
+
 Collideable.prototype.invoke = function(other) {
 	var entity = this.entity
-	  , isActive = entity && entity.isActive
-      , collisionOptions = this.entity.collisionOpts
-	  , type = collisionOptions.type
+	  , isActive = entity.isActive
+      , collisionOptions = entity.collisionOpts
+	  , action = collisionOptions.action
       , speedProp = collisionOptions.speedProp
+      , hasIntersect = false
     ;
 
-	if (!isActive) return;
+	if (!isActive || ! (other && other.name) || other.name === entity.name) return;
 
-	var closestX = Collideable._getClosestPoint({ 
-	        point: other.x - (entity.radius*640) //FIXME: need viewport info
-	      , minimum: entity.x
-		  , maximum: entity.x + entity.width
-	    })
+    switch (collisionOptions.type) {
+        case 'circle':
+            var closestX = Collideable._getClosestPoint({
+                    point: other.x + (other.width/2 * 640) // FIXME: viewport width
+                  , minimum: entity.x
+                  , maximum: entity.x + entity.radius/2
+                })
 
-	  , closestY = Collideable._getClosestPoint({ 
-		    point: other.y - (entity.radius*480) //FIXME: need viewport info
-		  , minimum: entity.y
-		  , maximum: entity.y + entity.height
-	    })
+              , closestY = Collideable._getClosestPoint({
+                    point: other.y + (other.height/2 * 480) // FIXME: viewport height
+                  , minimum: entity.y
+                  , maximum: entity.y + entity.radius/2
+                })
 
-	  , distanceX = other.x - closestX
-	  , distanceY = other.y - closestY
-	  , distanceSquared = distanceX * distanceX + distanceY * distanceY
+    	      , distanceX = other.x - closestX
+	          , distanceY = other.y - closestY
+        	  , distanceSquared = distanceX * distanceX + distanceY * distanceY
+            ;
 
-	  , hasIntersect = distanceSquared < entity.radius * entity.radius
-    ;
+        	hasIntersect = distanceSquared < entity.radius * entity.radius
+            break;
 
-	if (hasIntersect) Collideable._actions[type]({ other: other, entity: entity, speedProp: speedProp });
+        case 'box':
+        default:
+            var boxEntity = Collideable._getBoundingBox(entity)
+              , boxOther = Collideable._getBoundingBox(other)
+            ;
 
-var debug = false;
-if (debug && hasIntersect) {
-  console.log('collideable: entity, other:', entity, other);
-  console.log('entity.x: %s, entity.y: %s', entity.x, entity.y);
-  console.log('other.x: %s, other.y', other.x, other.y);
-  console.log('closestX: %s, closestY: %s', closestX, closestY);
-  console.log('distanceX: %s, distanceY: %s', distanceX, distanceY);
-  console.log('hasIntersect? %s, distanceSquared = %s, radius^2 = %s', hasIntersect, distanceSquared, (entity.radius*entity.radius));
-  console.log('')
-  //debugger;
-}
+            hasIntersect = (
+                boxEntity.x < boxOther.x + boxOther.w  &&
+                boxEntity.x + boxEntity.w > boxOther.x &&
+                boxEntity.y < boxOther.y + boxOther.h  &&
+                boxEntity.y + boxEntity.h > boxOther.y
+            );
+    }
+
+	if (hasIntersect) {
+        Collideable._actions[action]({ other: other, entity: entity, speedProp: speedProp });
+    }
 };
 
 module.exports = Collideable;

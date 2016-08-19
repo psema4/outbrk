@@ -27,11 +27,6 @@ Renderable._types = {
           , _fillStyle = opts.context.fillStyle
         ;
 
-/* draw background for collision testing
-        opts.context.fillStyle = 'red';
-        opts.context.fillRect(projectedX - projectedRadius, projectedY - projectedRadius, projectedRadius*2, projectedRadius*2);
-*/
-
         opts.context.fillStyle = _fillStyle;
         opts.context.beginPath();
         opts.context.arc(projectedX, projectedY, projectedRadius, 0, Math.PI * 2);

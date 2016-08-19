@@ -1,14 +1,16 @@
+/* The Player object should not use the current implementation of the Collideable 
+ * component. *All collisions* are currently processed against the player
+ */
 var Renderable = require('../components/Renderable')
   , Moveable = require('../components/Moveable')
-  , Collideable = require('../components/Collideable')
-  , x = 0.00    // percentages
-  , y = 0.00
-  , SPEED = 0.004
-  , RADIUS = 0.01
+  , x = 1.10    // percentages
+  , y = 1.00
+  , SPEED = -0.004
+  , RADIUS = 0.02
 ;
 
-function Ball() {
-    this.name = 'Ball';
+function Player() {
+    this.name = 'Player';
     this.isActive = true;
 
     this.x = x;
@@ -16,8 +18,8 @@ function Ball() {
     this.radius = RADIUS;
 
     //FIXME: make collision bounds more clear
-    this.width = 0.02;
-    this.height = 0.02;
+    this.width = 0.04;
+    this.height = 0.04;
 
     this.xSpeed = SPEED;
     this.ySpeed = SPEED;
@@ -27,19 +29,12 @@ function Ball() {
 
       , fillStyle: {
             type: 'colour'
-          , colour: 'red'
+          , colour: 'blue'
         }
     };
 
-    this.collisionOpts = {
-        type: 'box'
-      , action: 'deflect'
-      , speedProp: 'ySpeed'
-    }
-
     new Renderable(this);
     new Moveable(this);
-    new Collideable(this);
 }
 
-module.exports = Ball;
+module.exports = Player;

@@ -1,5 +1,6 @@
 var Renderable = require('../components/Renderable')
   , Moveable = require('../components/Moveable')
+  , Collideable = require('../components/Collideable')
   , x = 0.10    // percentages
   , y = 0.10
   , SPEED = 0.0025
@@ -8,6 +9,7 @@ var Renderable = require('../components/Renderable')
 ;
 
 function Pacman() {
+    this.name = 'Pacman';
     this.isActive = true;
 
     this.x = x;
@@ -31,11 +33,7 @@ function Pacman() {
                       , y = opts.entity.y * vp.height - (opts.entity.height / 2)
                     ;
 
-/* draw background for collision testing
-                    ctx.fillStyle='red';
-                    ctx.fillRect(x, y, opts.entity.width * vp.width, opts.entity.height * vp.height);    
-*/
-                    ctx.fillStyle='black';
+                    ctx.fillStyle='#FFDF00';
 
                     // pacman
                     ctx.beginPath();
@@ -47,8 +45,15 @@ function Pacman() {
         }
     }
 
+    this.collisionOpts = {
+        type: 'box'
+      , action: 'deflect'
+      , speedProp: 'ySpeed'
+    }
+
     new Renderable(this);
     new Moveable(this);
+    new Collideable(this);
 }
 
 module.exports = Pacman;

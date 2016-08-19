@@ -15,11 +15,15 @@ module.exports = {
         this.player = entity;
     }
 
-  , invoke: function() {
-        var player = this.player;
+  , invoke: function(pool) {
+        var player = this.player
+          , objects = Object.keys(pool)
+        ;
 
         [].forEach.call(this.components, function(component) {
-            component.invoke(player);
+            [].forEach.call(objects, function(object) {
+                component.invoke(pool[object]);
+            });
         });
     }
 }

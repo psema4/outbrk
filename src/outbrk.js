@@ -19,15 +19,17 @@ var outbrk = function(opts) {
         objectPool.create();
         window.objectPool = objectPool;
 
-        collisionSystem.setPlayer(objectPool.get('pacman'));
+        collisionSystem.setPlayer(objectPool.get('player'));
 
         function gameloop() {
+            var pool = objectPool.getAll();
+
             ctx2d.clearRect(0, 0, viewport.width, viewport.height);
             moverSystem.invoke();
-            collisionSystem.invoke();
+
+            collisionSystem.invoke(pool);
             renderSystem.invoke();
 
-            //console.log('tick');
             requestAnimationFrame(gameloop);
         }
 
