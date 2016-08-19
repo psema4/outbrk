@@ -6,7 +6,7 @@ function Collideable(entity) {
 }
 
 Collideable._actions = {
-	deflect(opts) {
+	deflect: function (opts) {
         opts = opts || {};
 
         var other = opts.other
@@ -17,7 +17,7 @@ Collideable._actions = {
         other[speedProp] *= -1;
 	},
 
-	deactivate(opts) {
+	deactivate: function(opts) {
         opts = opts || {};
 
         var other = opts.other
